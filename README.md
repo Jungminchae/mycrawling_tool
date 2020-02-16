@@ -6,3 +6,4 @@
  - Youtube comments 크롤링
  - naver에서 이미지 다운로드 받기 
  - naver news 검색 후 제목과 내용 크롤링
+ - naver에서 주가 데이터 크롤링
