@@ -322,10 +322,17 @@ class mycrawler:
         elif return_type == 'list' :
             return naver_news_title, naver_news_content     
 
-
-
-
-
+    def naver_juga_day(self,stock_number='005930', pages=1):
+        """
+        1 page당 10일의 주가 데이터
+        """
+        stock_price = pd.DataFrame()
+        for page in range(pages):
+            url = 'https://finance.naver.com/item/sise_day.nhn?code={}&page={}'.format(stock_number, page+1)
+            juga = pd.read_html(url)
+            juga = juga[0].dropna()
+            stock_price = pd.concat([stock_price,juga], axis=0)
+        return stock_price
 
 
 
