@@ -332,6 +332,7 @@ class mycrawler:
             juga = pd.read_html(url)
             juga = juga[0].dropna()
             stock_price = pd.concat([stock_price,juga], axis=0)
+        stock_price.reset_index(drop=True, inplace=True)
         return stock_price
 
 
