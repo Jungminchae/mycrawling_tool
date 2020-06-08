@@ -20,7 +20,7 @@ import os
 import sys
 import ast
 import requests
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 
 class mycrawler:
@@ -32,6 +32,7 @@ class mycrawler:
         '''chrome browser만 열기'''
         self.browser = webdriver.Chrome(browser_loc)
         self.browser.implicitly_wait(3)
+        self.browser.maximize_window()
         return self.browser
     
     def browser_open_hl(self,browser_loc):
@@ -46,7 +47,8 @@ class mycrawler:
         '''browser 열고 url까지 입력'''
         self.browser = webdriver.Chrome(browser_loc)
         self.browser.implicitly_wait(3)
-        self.browser.get(url)        
+        self.browser.get(url)
+        self.browser.maximize_window()
         return self.browser
 
     def browser_open_with_url_hl(self,browser_loc, url):
@@ -56,8 +58,30 @@ class mycrawler:
         chrome_option.add_argument('--headless')
         self.browser = webdriver.Chrome(browser_loc, options=chrome_option)
         self.browser.implicitly_wait(3)
-        self.browser.get(url)        
+        self.browser.get(url)
         return self.browser
+
+    def Twitter_Crawling(self, query, end_date, start_date, driver):
+        '''트위터 크롤링을 위한 트위터 브라우저 열기'''
+        url = 'https://twitter.com/search?q={}until%3A{}%20since%3A{}&src=typed_query'.format(query,end_date ,start_date)
+        browser = self.browser_open_with_url(driver, url)
+
+        # page_down
+        self.pagedownTobottom(time_setting=3)
+        # 텍스트 추출
+        page_source = browser.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        t = soup.find_all('a', attrs={'class':'css-4rbku5 css-18t94o4 css-901oao r-1re7ezh r-1loqt21 r-1q142lx r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-3s2u2q r-qvutc0'})
+        temp =soup.find_all('div', attrs={'lang':'ko','class':'css-901oao r-hkyrab r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0'})
+        print('시작')
+        time_data =[]
+        text_data = []
+        for i,j in tqdm(zip(t,temp)):
+            time_data.append(i.text)
+            text_data.append(j.text)
+        print('완료')
+        return time_data, text_data
 
         
     def pagedownTobottom(self, time_setting =3):        
@@ -255,12 +279,12 @@ class mycrawler:
         chrome_option.add_argument('--headless')
         driver = webdriver.Chrome('D:/jupyter/chrome_driver/chromedriver.exe',options=chrome_option)
         
-        for n in tqdm_notebook(range(len(naver_news_link))):
+        for n in tqdm(range(len(naver_news_link))):
             
             news_page_title =[]
             news_page_content = []
             
-            for idx in tqdm_notebook(range(len(naver_news_link[n]))):
+            for idx in tqdm(range(len(naver_news_link[n]))):
                 
                 try:
                     driver.get(naver_news_link[n][idx])
