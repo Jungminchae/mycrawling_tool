@@ -59,29 +59,42 @@ class mycrawler:
         self.browser = webdriver.Chrome(browser_loc, options=chrome_option)
         self.browser.implicitly_wait(3)
         self.browser.get(url)
-        return self.browser
-
-    def Twitter_Crawling(self, query, end_date, start_date, driver):
-        '''트위터 크롤링을 위한 트위터 브라우저 열기'''
+        return self.browser    
+    
+    def Twitter_open(self, query, end_date, start_date, driver):
         url = 'https://twitter.com/search?q={}until%3A{}%20since%3A{}&src=typed_query'.format(query,end_date ,start_date)
-        browser = self.browser_open_with_url(driver, url)
-
-        # page_down
-        self.pagedownTobottom(time_setting=3)
-        # 텍스트 추출
-        page_source = browser.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
-
-        t = soup.find_all('a', attrs={'class':'css-4rbku5 css-18t94o4 css-901oao r-1re7ezh r-1loqt21 r-1q142lx r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-3s2u2q r-qvutc0'})
-        temp =soup.find_all('div', attrs={'lang':'ko','class':'css-901oao r-hkyrab r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0'})
-        print('시작')
-        time_data =[]
+        browser = self.browser_open_with_url(driver, url)        
+        return browser
+    
+    def Twitter_crawler(self,browser):
+        '''
+        한 번씩 스크롤을 내릴 때 마다 트윗 가져옴
+        '''
+        time_data = []
         text_data = []
-        for i,j in tqdm(zip(t,temp)):
-            time_data.append(i.text)
-            text_data.append(j.text)
-        print('완료')
-        return time_data, text_data
+        last_height = self.browser.execute_script("return document.documentElement.scrollHeight")
+        for _ in range(10000):
+            self.browser.execute_script("window.scrollTo(0,document.documentElement.scrollHeight);")
+            page_src = browser.page_source
+            src = BeautifulSoup(page_src, 'html.parser')
+            t = src.find_all('a', attrs={'class':'css-4rbku5 css-18t94o4 css-901oao r-1re7ezh r-1loqt21 r-1q142lx r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-3s2u2q r-qvutc0'})
+            temp = src.find_all('div', attrs={'lang':'ko','class':'css-901oao r-hkyrab r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0'})
+            for i,j in zip(t,temp):
+                time_data.append(i.text)
+                text_data.append(j.text)
+            time.sleep(3)
+            new_height = self.browser.execute_script("return document.documentElement.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+        browser.close()
+        # DataFrame으로 만들기
+        data = pd.DataFrame()
+        data['time'] = time_data
+        data['text'] = text_data
+        # 중복제거
+        data = data.drop_duplicates()
+        return data
 
         
     def pagedownTobottom(self, time_setting =3):        
