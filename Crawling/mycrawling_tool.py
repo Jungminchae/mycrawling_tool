@@ -364,13 +364,25 @@ class mycrawler:
         1 page당 10일의 주가 데이터
         """
         stock_price = pd.DataFrame()
-        for page in range(pages):
-            url = 'https://finance.naver.com/item/sise_day.nhn?code={}&page={}'.format(stock_number, page+1)
-            juga = pd.read_html(url)
-            juga = juga[0].dropna()
-            stock_price = pd.concat([stock_price,juga], axis=0)
-        stock_price.reset_index(drop=True, inplace=True)
-        return stock_price
+        if stock_number != ('KOSPI' or 'KOSDAQ'):
+            for page in range(pages):
+                url = 'https://finance.naver.com/item/sise_day.nhn?code={}&page={}'.format(stock_number, page+1)
+                juga = pd.read_html(url)
+                juga = juga[0].dropna()
+                stock_price = pd.concat([stock_price,juga], axis=0)
+            stock_price.reset_index(drop=True, inplace=True)
+            return stock_price
+        
+        elif stock_number =='KOSPI':
+            for page in range(pages):
+                url = 'https://finance.naver.com/sise/sise_index_day.nhn?code={}&page={}'.format(stock_number, page+1)
+                juga = pd.read_html(url)
+                juga = juga[0].dropna()
+                stock_price = pd.concat([stock_price,juga], axis=0)
+            stock_price.reset_index(drop=True, inplace=True)
+            return stock_price
+            
+
 
 
 
