@@ -26,44 +26,67 @@ from tqdm import tqdm
 class mycrawler:
 
     def __init__(self):
-        pass
+        self.browser_loc = './chromedriver/chromedriver.exe'
     
-    def browser_open(self,browser_loc):
+    def browser_open(self):
         '''chrome browser만 열기'''
-        self.browser = webdriver.Chrome(browser_loc)
+        self.browser = webdriver.Chrome(self.browser_loc)
         self.browser.implicitly_wait(3)
         self.browser.maximize_window()
         return self.browser
     
-    def browser_open_hl(self,browser_loc):
+    def browser_open_hl(self):
         '''browser headless로 열기'''
         chrome_option = Options()
         chrome_option.add_argument('--headless')
-        self.browser = webdriver.Chrome(browser_loc, options=chrome_option)
+        self.browser = webdriver.Chrome(self.browser_loc, options=chrome_option)
         self.browser.implicitly_wait(3)
         return self.browser
 
-    def browser_open_with_url(self,browser_loc, url):
+    def browser_open_with_url(self, url):
         '''browser 열고 url까지 입력'''
-        self.browser = webdriver.Chrome(browser_loc)
+        self.browser = webdriver.Chrome(self.browser_loc)
         self.browser.implicitly_wait(3)
         self.browser.get(url)
         self.browser.maximize_window()
         return self.browser
 
-    def browser_open_with_url_hl(self,browser_loc, url):
+    def browser_open_with_url_hl(self, url):
         '''browser headless로 열고 
             url까지 입력  '''
         chrome_option = Options()
         chrome_option.add_argument('--headless')
-        self.browser = webdriver.Chrome(browser_loc, options=chrome_option)
+        self.browser = webdriver.Chrome(self.browser_loc, options=chrome_option)
         self.browser.implicitly_wait(3)
         self.browser.get(url)
-        return self.browser    
-    
-    def Twitter_open(self, query, end_date, start_date, driver):
+        return self.browser
+
+    def google_image_crawler(self,search, down_num, image_class_name):
+        '''
+        search : 검색어 (띄어쓰기 있을시 공백 대신 + 로 대체 ex: google drive 검색시 google+drive)
+        down_num : 스크롤 다운 몇 번 할 것인지
+        image_class_name : 검색했을 때 이미지 클래스 이름 - 개발자 도구 열고 확인
+        '''
+        # browser 열고 이미지 검색 및 위치 찾기
+        browser = self.browser_open_with_url('https://www.google.co.kr/search?q={}&tbm=isch'.format(search))
+
+        self.pagedown(down_num)
+        image_paths = browser.find_elements_by_class_name(image_class_name)
+        # 데이터 저장 위치
+        if os.path.isdir('./data') == False:
+            os.mkdir('./data')
+        # 이미지 로컬에 저장
+        for i,image in enumerate(image_paths):
+            i += 1
+            if i < 10:
+                i = '0' + str(i)
+            else:
+                i = str(i)
+            image.screenshot('./data/{}.png'.format(i))    
+        
+    def Twitter_open(self, query, end_date, start_date):
         url = 'https://twitter.com/search?q={}until%3A{}%20since%3A{}&src=typed_query'.format(query,end_date ,start_date)
-        browser = self.browser_open_with_url(driver, url)        
+        browser = self.browser_open_with_url(url)        
         return browser
     
     def Twitter_crawler(self,browser):
