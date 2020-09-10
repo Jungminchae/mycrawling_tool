@@ -26,7 +26,7 @@ from tqdm import tqdm
 class mycrawler:
 
     def __init__(self):
-        self.browser_loc = './chromedriver/chromedriver.exe'
+        self.browser_loc = './chromedriver/chromedriver'
     
     def browser_open(self):
         '''chrome browser만 열기'''
@@ -75,6 +75,13 @@ class mycrawler:
         # 데이터 저장 위치
         if os.path.isdir('./data') == False:
             os.mkdir('./data')
+        if os.path.isdir('./data/{}'.format(search)) == False:
+            os.mkdir('./data/{}'.format(search))
+        
+        if '+' in search:
+            file_name_header = search.replace('+','_')
+        else:
+            file_name_header = search
         # 이미지 로컬에 저장
         for i,image in enumerate(image_paths):
             i += 1
@@ -82,7 +89,8 @@ class mycrawler:
                 i = '0' + str(i)
             else:
                 i = str(i)
-            image.screenshot('./data/{}.png'.format(i))    
+            image.screenshot('./data/{}/{}_{}.png'.format(search,file_name_header,i))
+        browser.close()
         
     def Twitter_open(self, query, end_date, start_date):
         url = 'https://twitter.com/search?q={}until%3A{}%20since%3A{}&src=typed_query'.format(query,end_date ,start_date)
@@ -217,7 +225,8 @@ class mycrawler:
         url = base + quote 
         
         # url 요청
-        res = self.browser.get(url)
+        browser = browser_open()
+        res = browser.get(url)
         
         savePath = PATH
         
@@ -235,7 +244,7 @@ class mycrawler:
             # 폴더 생성이 되었거나, 존재할 경우
             print("folder is created!")
             
-        body = self.browser.find_element_by_tag_name('body')
+        body = browser.find_element_by_tag_name('body')
         # page down
         if num_page_down == 9999:
             self.pagedownTobottom()
