@@ -23,10 +23,14 @@ import requests
 from tqdm import tqdm
 
 
-class mycrawler:
+class Mycrawler:
 
     def __init__(self):
         self.browser_loc = './chromedriver/chromedriver'
+    
+    @classmethod
+    def chrome_driver_location(cls, location):
+        cls.browser_loc = location
     
     def browser_open(self):
         '''chrome browser만 열기'''
@@ -403,6 +407,7 @@ class mycrawler:
                 juga = juga[0].dropna()
                 stock_price = pd.concat([stock_price,juga], axis=0)
             stock_price.reset_index(drop=True, inplace=True)
+            stock_price.drop_duplicates(inplace=True)
             return stock_price
         
         elif stock_number =='KOSPI':
@@ -412,6 +417,7 @@ class mycrawler:
                 juga = juga[0].dropna()
                 stock_price = pd.concat([stock_price,juga], axis=0)
             stock_price.reset_index(drop=True, inplace=True)
+            stock_price.drop_duplicates(inplace=True)
             return stock_price
             
 
